@@ -491,6 +491,8 @@ def env_for_sssctl(request):
     return env_for_sssctl
 
 
+# Covered by test_gdm__smartcard_login_fails_with_incorrect_pin but should probably 
+# also have a separate simple test in system tests
 @pytest.mark.parametrize('simple_pam_cert_auth', provider_list(), indirect=True)
 def test_sc_auth_wrong_pin(simple_pam_cert_auth, env_for_sssctl):
 
@@ -516,6 +518,7 @@ def test_sc_auth_wrong_pin(simple_pam_cert_auth, env_for_sssctl):
                     "Authentication failure") != -1
 
 
+# Covered by test_smartcard__su_as_local_user in system tests
 @pytest.mark.parametrize('simple_pam_cert_auth', provider_list(), indirect=True)
 def test_sc_auth(simple_pam_cert_auth, env_for_sssctl):
 
@@ -540,6 +543,8 @@ def test_sc_auth(simple_pam_cert_auth, env_for_sssctl):
     assert err.find("pam_authenticate for user [user1]: Success") != -1
 
 
+# Covered in old test framework [IDM-IPA-TC: Smart Card: MultiCert One Key: prompt to select cert when mapped]
+# Should have a simple version added to system tests
 @pytest.mark.parametrize('simple_pam_cert_auth_two_certs', provider_list(), indirect=True)
 def test_sc_auth_two(simple_pam_cert_auth_two_certs, env_for_sssctl):
 
@@ -564,6 +569,8 @@ def test_sc_auth_two(simple_pam_cert_auth_two_certs, env_for_sssctl):
     assert err.find("pam_authenticate for user [user1]: Success") != -1
 
 
+# We do not currently have a legacy or system test that configures pam with "allow_missing_name".
+# Is this used enough that we should add a system test?
 @pytest.mark.parametrize('simple_pam_cert_auth_two_certs', provider_list(), indirect=True)
 def test_sc_auth_two_missing_name(simple_pam_cert_auth_two_certs, env_for_sssctl):
 
@@ -588,6 +595,7 @@ def test_sc_auth_two_missing_name(simple_pam_cert_auth_two_certs, env_for_sssctl
     assert err.find("pam_authenticate for user [user1]: Success") != -1
 
 
+# We do not have a test that checks for password prompt with specific proxy config.
 @pytest.mark.parametrize('simple_pam_cert_auth', ['proxy_password'], indirect=True)
 def test_sc_proxy_password_fallback(simple_pam_cert_auth, env_for_sssctl):
     """
@@ -610,6 +618,13 @@ def test_sc_proxy_password_fallback(simple_pam_cert_auth, env_for_sssctl):
     assert err.find("Password:") != -1
 
 
+# We do not have a test that checks for PIN prompt with this specific proxy config
+# id_provider = proxy
+# local_auth_policy = enable:smartcard
+# proxy_lib_name = call
+# proxy_pam_target = sssd-shadowutils
+# The system test test_smartcard__su_as_local_user just sets local_auth_policy=only.
+# Does that adequately test this?   I'm guessing we need to add a system test
 @pytest.mark.parametrize('simple_pam_cert_auth', ['proxy_password_with_sc'],
                          indirect=True)
 def test_sc_proxy_no_password_fallback(simple_pam_cert_auth, env_for_sssctl):
@@ -639,7 +654,8 @@ def test_sc_proxy_no_password_fallback(simple_pam_cert_auth, env_for_sssctl):
 
     assert err.find("pam_authenticate for user [user1]: Success") != -1
 
-
+# We test similar in legacy test [IDM-IPA-TC: Smart Card: Required: prompt to insert card]
+# This is accomplished instead with authselect call.
 @pytest.mark.parametrize('simple_pam_cert_auth', provider_list(), indirect=True)
 def test_require_sc_auth(simple_pam_cert_auth, env_for_sssctl):
 
@@ -664,7 +680,9 @@ def test_require_sc_auth(simple_pam_cert_auth, env_for_sssctl):
 
     assert err.find("pam_authenticate for user [user1]: Success") != -1
 
-
+# This is partially covered by legacy test [IDM-IPA-TC: Smart Card: Required: prompt to insert card]
+# However, we do not check for an error message.
+# This should probably be added to the system tests
 @pytest.mark.parametrize('simple_pam_cert_auth_no_cert', provider_list(), indirect=True)
 def test_require_sc_auth_no_cert(simple_pam_cert_auth_no_cert, env_for_sssctl):
 
@@ -700,7 +718,8 @@ def test_require_sc_auth_no_cert(simple_pam_cert_auth_no_cert, env_for_sssctl):
     assert err.find("pam_authenticate for user [user1]: Authentication "
                     "service cannot retrieve authentication info") != -1
 
-
+# Covered by legacy test [IDM-IPA-TC: Smart Card: Su SingleUser: fail as IPA user without cert]
+# Should add system test
 @pytest.mark.parametrize('simple_pam_cert_auth', provider_list(), indirect=True)
 def test_try_sc_auth_no_map(simple_pam_cert_auth, env_for_sssctl):
 
@@ -726,7 +745,8 @@ def test_try_sc_auth_no_map(simple_pam_cert_auth, env_for_sssctl):
     assert err.find("pam_authenticate for user [user2]: Authentication "
                     "service cannot retrieve authentication info") != -1
 
-
+# I don't think we have any tests with option try_cert_auth added in pam.
+# Do we need a test for this still?
 @pytest.mark.parametrize('simple_pam_cert_auth', provider_list(), indirect=True)
 def test_try_sc_auth(simple_pam_cert_auth, env_for_sssctl):
 
@@ -752,6 +772,8 @@ def test_try_sc_auth(simple_pam_cert_auth, env_for_sssctl):
     assert err.find("pam_authenticate for user [user1]: Success") != -1
 
 
+# I don't think we have any tests with option try_cert_auth added in pam.
+# Do we need a test for this still?
 @pytest.mark.parametrize('simple_pam_cert_auth', provider_list(), indirect=True)
 def test_try_sc_auth_root(simple_pam_cert_auth, env_for_sssctl):
     """
@@ -781,6 +803,8 @@ def test_try_sc_auth_root(simple_pam_cert_auth, env_for_sssctl):
                     "service cannot retrieve authentication info") != -1
 
 
+# I don't think we have any tests with option allow_missing_name added in pam.
+# Do we need a test for this still?
 @pytest.mark.parametrize('simple_pam_cert_auth', provider_list(), indirect=True)
 def test_sc_auth_missing_name(simple_pam_cert_auth, env_for_sssctl):
     """
@@ -809,6 +833,8 @@ def test_sc_auth_missing_name(simple_pam_cert_auth, env_for_sssctl):
     assert err.find("pam_authenticate for user [user1]: Success") != -1
 
 
+# I don't think we have any tests with option allow_missing_name added in pam.
+# Do we need a test for this still?
 @pytest.mark.parametrize('simple_pam_cert_auth', provider_list(), indirect=True)
 def test_sc_auth_missing_name_whitespace(simple_pam_cert_auth, env_for_sssctl):
     """
@@ -837,6 +863,8 @@ def test_sc_auth_missing_name_whitespace(simple_pam_cert_auth, env_for_sssctl):
     assert err.find("pam_authenticate for user [user1]: Success") != -1
 
 
+# I don't think we have any tests with option allow_missing_name added in pam.
+# Do we need a test for this still?
 @pytest.mark.parametrize('simple_pam_cert_auth_name_format', provider_list(), indirect=True)
 def test_sc_auth_name_format(simple_pam_cert_auth_name_format, env_for_sssctl):
     """
