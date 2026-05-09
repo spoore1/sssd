@@ -397,6 +397,9 @@ def test_gdm__passkey_local_login_succeeds_with_pin(client: Client, ldap: LDAP):
 
     ldap.user(testuser).add()
 
+    #import pytest; pytest.set_trace()
+    import time; time.sleep(5)
+
     mapping = client.sssctl.passkey_register(username=testuser, domain="ldap.test", pin=123456, virt_type="vfido")
 
     ldap.user(testuser).passkey_add(mapping)
@@ -601,7 +604,7 @@ def test_gdm__smartcard_login_succeeds_with_certs_and_passkey(client: Client, ip
 
 @pytest.mark.topology(KnownTopology.GDM)
 @pytest.mark.builtwith(client="gdm")
-@pytest.mark.builtwith(client="idp-provider")
+# @pytest.mark.builtwith(client="idp-provider")
 def test_gdm__xidp_login_rejected_for_invalid_password(client: Client, ipa: IPA, keycloak: Keycloak):
     """
     :title: Login via GDM with external IdP user is rejected with invalid password
@@ -622,10 +625,12 @@ def test_gdm__xidp_login_rejected_for_invalid_password(client: Client, ipa: IPA,
         client, testuser, password[:-1]
     ), "GDM EIdP Login passed when it should have failed!"
 
+    client.gdm.done()
+
 
 @pytest.mark.topology(KnownTopology.GDM)
 @pytest.mark.builtwith(client="gdm")
-@pytest.mark.builtwith(client="idp-provider")
+# @pytest.mark.builtwith(client="idp-provider")
 def test_gdm__xidp_login_rejected_when_user_disabled(client: Client, ipa: IPA, keycloak: Keycloak):
     """
     :title: Login via GDM with external IdP user is rejected when login is disabled
@@ -647,10 +652,12 @@ def test_gdm__xidp_login_rejected_when_user_disabled(client: Client, ipa: IPA, k
 
     assert not client.gdm.login_idp(client, testuser, password), "GDM EIdP Login passed when it should have failed!"
 
+    client.gdm.done()
+
 
 @pytest.mark.topology(KnownTopology.GDM)
 @pytest.mark.builtwith(client="gdm")
-@pytest.mark.builtwith(client="idp-provider")
+# @pytest.mark.builtwith(client="idp-provider")
 def test_gdm__xidp_user_is_forced_to_change_password_before_login(client: Client, ipa: IPA, keycloak: Keycloak):
     """
     :title: Login via GDM with external IdP when user must change their password
@@ -674,12 +681,14 @@ def test_gdm__xidp_user_is_forced_to_change_password_before_login(client: Client
         client, testuser, f"{password}:::NewPa55"
     ), "GDM EIdP Login with password change failed!"
 
+    client.gdm.done()
+
 
 @pytest.mark.flaky(max_runs=5)
 @pytest.mark.importance("critical")
 @pytest.mark.topology(KnownTopology.GDM)
 @pytest.mark.builtwith(client="gdm")
-@pytest.mark.builtwith(client="idp-provider")
+# @pytest.mark.builtwith(client="idp-provider")
 def test_gdm__xidp_login_succeeds_and_gets_kerberos_ticket(client: Client, ipa: IPA, keycloak: Keycloak):
     """
     :title: Login via GDM with external IdP user
@@ -701,3 +710,5 @@ def test_gdm__xidp_login_succeeds_and_gets_kerberos_ticket(client: Client, ipa: 
     assert client.gdm.login_idp(client, testuser, password), "GDM EIdP Login failed!"
 
     assert kerberos(client.host).user_has_tgt("kcgdmuser1", ipa.realm), "Kerberos ticket not found!"
+
+    client.gdm.done()
