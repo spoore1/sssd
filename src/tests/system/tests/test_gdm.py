@@ -59,6 +59,7 @@ def client_setup_sssd(client: Client, provider: IPA | LDAP):
     else:
         client.sssd.domain["local_auth_policy"] = "enable:passkey"
 
+    client.sssd.clear()
     client.sssd.start()
 
 
@@ -143,13 +144,15 @@ def test_gdm__passkey_login_succeeds_with_pin(client: Client, ipa: IPA):
     ipa.user(testuser).add(user_auth_type="passkey")
 
     ipa.user(testuser).passkey_add_register(client=client, pin=pin, virt_type="vfido")
+    # pytest.set_trace()
 
+    client.svc.restart('vfido')
     client.gdm.click_on("listed?")
     client.gdm.kb_write(testuser)
     client.gdm.kb_send("tab")
     client.gdm.click_on("Security key PIN")
     client.gdm.kb_write(pin)
-    client.gdm.assert_text("Touch security key")
+    client.gdm.assert_text("Touch security key", fail=True)
     client.vfido.touch()
     client.gdm.wait_for_login(client)
     assert client.gdm.check_home_screen(), "User unable to login or see home screen"
@@ -184,12 +187,15 @@ def test_gdm__passkey_login_succeeds_when_pin_disabled(client: Client, ipa: IPA)
 
     ipa.user(testuser).passkey_add_register(client=client, pin=None, virt_type="vfido")
 
+    # pytest.set_trace()
+    client.svc.restart('vfido')
     client.gdm.click_on("listed?")
     client.gdm.kb_write(testuser)
     client.gdm.kb_send("tab")
     client.gdm.click_on("Security key PIN")
     client.gdm.kb_send("enter")
-    client.gdm.assert_text("Touch security key")
+    time.sleep(2)
+    client.gdm.assert_text("Touch security key", fail=True)
     client.vfido.touch()
     client.gdm.wait_for_login(client)
     assert client.gdm.check_home_screen(), "User unable to login or see home screen"
@@ -226,6 +232,8 @@ def test_gdm__passkey_login_succeeds_with_password_instead_of_pin(client: Client
 
     ipa.user(testuser).passkey_add_register(client=client, pin=pin, virt_type="vfido")
 
+    # pytest.set_trace()
+    client.svc.restart('vfido')
     client.gdm.click_on("listed?")
     client.gdm.kb_write(testuser)
     client.gdm.kb_send("tab")
@@ -270,12 +278,14 @@ def test_gdm__passkey_login_succeeds_with_multiple_keys(client: Client, ipa: IPA
 
     ipa.user(testuser).passkey_add_register(client=client, pin=pin, virt_type="vfido")
 
+    # pytest.set_trace()
+    client.svc.restart('vfido')
     client.gdm.click_on("listed?")
     client.gdm.kb_write(testuser)
     client.gdm.kb_send("tab")
     client.gdm.click_on("Security key PIN")
     client.gdm.kb_write(pin)
-    client.gdm.assert_text("Touch security key")
+    client.gdm.assert_text("Touch security key", fail=True)
     client.vfido.touch()
     client.gdm.wait_for_login(client)
     assert client.gdm.check_home_screen(), "User unable to login or see home screen"
@@ -315,6 +325,8 @@ def test_gdm__passkey_login_rejected_when_passkey_mapping_removed(client: Client
     else:
         raise ValueError(f"ipa.user({testuser}) passkey mapping not found")
 
+    # pytest.set_trace()
+    client.svc.restart('vfido')
     client.gdm.click_on("listed?")
     client.gdm.kb_write(testuser)
     client.gdm.kb_send("tab")
@@ -363,6 +375,8 @@ def test_gdm__passkey_login_rejected_with_unregistered_mapping(client: Client, i
 
     ipa.user(testuser).passkey_add(bad_mapping)
 
+    # pytest.set_trace()
+    client.svc.restart('vfido')
     client.gdm.click_on("listed?")
     client.gdm.kb_write(testuser)
     client.gdm.kb_send("tab")
@@ -397,16 +411,22 @@ def test_gdm__passkey_local_login_succeeds_with_pin(client: Client, ldap: LDAP):
 
     ldap.user(testuser).add()
 
+    import time; time.sleep(5)
+
     mapping = client.sssctl.passkey_register(username=testuser, domain="ldap.test", pin=123456, virt_type="vfido")
 
     ldap.user(testuser).passkey_add(mapping)
 
+    #import pytest; # pytest.set_trace()
+
+    # pytest.set_trace()
+    client.svc.restart('vfido')
     client.gdm.click_on("listed?")
     client.gdm.kb_write(testuser)
     client.gdm.kb_send("tab")
     client.gdm.click_on("Security key PIN")
     client.gdm.kb_write(pin)
-    client.gdm.assert_text("Touch security key")
+    client.gdm.assert_text("Touch security key", fail=True)
     client.vfido.touch()
     client.gdm.wait_for_login(client)
     assert client.gdm.check_home_screen(), "User unable to login or see home screen"
@@ -448,12 +468,14 @@ def test_gdm__passkey_local_login_succeeds_with_no_pin(client: Client, ldap: LDA
 
     ldap.user(testuser).passkey_add(mapping)
 
+    # pytest.set_trace()
+    client.svc.restart('vfido')
     client.gdm.click_on("listed?")
     client.gdm.kb_write(testuser)
     client.gdm.kb_send("tab")
     client.gdm.click_on("Security key PIN")
     client.gdm.kb_send("enter")
-    client.gdm.assert_text("Touch security key")
+    client.gdm.assert_text("Touch security key", fail=True)
     client.vfido.touch()
     client.gdm.wait_for_login(client)
     assert client.gdm.check_home_screen(), "User unable to login or see home screen"
@@ -483,6 +505,7 @@ def test_gdm__smartcard_login_succeeds_with_pin(client: Client, ipa: IPA):
 
     enroll_smartcard(client, ipa, testuser, id="01")
 
+    # pytest.set_trace()
     client.gdm.click_on("listed?")
     client.gdm.kb_write(testuser)
     client.gdm.kb_send("tab")
@@ -518,6 +541,7 @@ def test_gdm__smartcard_login_fails_with_incorrect_pin(client: Client, ipa: IPA)
 
     enroll_smartcard(client, ipa, testuser)
 
+    # pytest.set_trace()
     client.gdm.click_on("listed?")
     client.gdm.kb_send("tab")
     client.gdm.click_on("Username")
@@ -571,6 +595,8 @@ def test_gdm__smartcard_login_succeeds_with_certs_and_passkey(client: Client, ip
 
     ipa.user(testuser).passkey_add_register(client=client, pin=pin, virt_type="vfido")
 
+    # pytest.set_trace()
+    client.svc.restart('vfido')
     client.gdm.click_on("listed?")
     client.gdm.kb_write(testuser)
     client.gdm.kb_send("tab")
@@ -592,7 +618,7 @@ def test_gdm__smartcard_login_succeeds_with_certs_and_passkey(client: Client, ip
     client.gdm.click_on("Passkey")
     client.gdm.click_on("Security key PIN")
     client.gdm.kb_write(pin)
-    client.gdm.assert_text("Touch security key")
+    client.gdm.assert_text("Touch security key", fail=True)
     client.vfido.touch()
     client.gdm.wait_for_login(client)
     assert client.gdm.check_home_screen()
@@ -601,7 +627,7 @@ def test_gdm__smartcard_login_succeeds_with_certs_and_passkey(client: Client, ip
 
 @pytest.mark.topology(KnownTopology.GDM)
 @pytest.mark.builtwith(client="gdm")
-@pytest.mark.builtwith(client="idp-provider")
+# @pytest.mark.builtwith(client="idp-provider")
 def test_gdm__xidp_login_rejected_for_invalid_password(client: Client, ipa: IPA, keycloak: Keycloak):
     """
     :title: Login via GDM with external IdP user is rejected with invalid password
@@ -618,14 +644,19 @@ def test_gdm__xidp_login_rejected_for_invalid_password(client: Client, ipa: IPA,
 
     client_setup_xidp(client, ipa, keycloak, testuser)
 
+    ## pytest.set_trace()
+    # pytest.set_trace()
+
     assert not client.gdm.login_idp(
         client, testuser, password[:-1]
     ), "GDM EIdP Login passed when it should have failed!"
 
+    client.gdm.done()
+
 
 @pytest.mark.topology(KnownTopology.GDM)
 @pytest.mark.builtwith(client="gdm")
-@pytest.mark.builtwith(client="idp-provider")
+# @pytest.mark.builtwith(client="idp-provider")
 def test_gdm__xidp_login_rejected_when_user_disabled(client: Client, ipa: IPA, keycloak: Keycloak):
     """
     :title: Login via GDM with external IdP user is rejected when login is disabled
@@ -645,12 +676,15 @@ def test_gdm__xidp_login_rejected_when_user_disabled(client: Client, ipa: IPA, k
 
     keycloak.user(testuser).modify(enabled=False)
 
+    # pytest.set_trace()
     assert not client.gdm.login_idp(client, testuser, password), "GDM EIdP Login passed when it should have failed!"
+
+    client.gdm.done()
 
 
 @pytest.mark.topology(KnownTopology.GDM)
 @pytest.mark.builtwith(client="gdm")
-@pytest.mark.builtwith(client="idp-provider")
+# @pytest.mark.builtwith(client="idp-provider")
 def test_gdm__xidp_user_is_forced_to_change_password_before_login(client: Client, ipa: IPA, keycloak: Keycloak):
     """
     :title: Login via GDM with external IdP when user must change their password
@@ -670,16 +704,20 @@ def test_gdm__xidp_user_is_forced_to_change_password_before_login(client: Client
 
     keycloak.user(testuser).password_change_at_logon()
 
+    # pytest.set_trace()
     assert client.gdm.login_idp(
         client, testuser, f"{password}:::NewPa55"
     ), "GDM EIdP Login with password change failed!"
 
+    client.gdm.done()
 
+
+#@pytest.mark.skip(reason="krb test problematic in 10.3 ci jobs....trying with skip")
 @pytest.mark.flaky(max_runs=5)
-@pytest.mark.importance("critical")
+#@pytest.mark.importance("critical")
 @pytest.mark.topology(KnownTopology.GDM)
 @pytest.mark.builtwith(client="gdm")
-@pytest.mark.builtwith(client="idp-provider")
+# @pytest.mark.builtwith(client="idp-provider")
 def test_gdm__xidp_login_succeeds_and_gets_kerberos_ticket(client: Client, ipa: IPA, keycloak: Keycloak):
     """
     :title: Login via GDM with external IdP user
@@ -698,6 +736,11 @@ def test_gdm__xidp_login_succeeds_and_gets_kerberos_ticket(client: Client, ipa: 
 
     client_setup_xidp(client, ipa, keycloak, testuser)
 
+    ## pytest.set_trace()
+
+    # pytest.set_trace()
     assert client.gdm.login_idp(client, testuser, password), "GDM EIdP Login failed!"
 
     assert kerberos(client.host).user_has_tgt("kcgdmuser1", ipa.realm), "Kerberos ticket not found!"
+
+    client.gdm.done()
