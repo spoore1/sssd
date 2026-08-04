@@ -55,7 +55,7 @@ def create_user_with_cn(multihost, request):
         a DN starting e.g. with cn=...
         Create a local user foo12
     """
-    ldap_uri = 'ldap://%s' % multihost.master[0].sys_hostname
+    ldap_uri = 'ldaps://%s' % multihost.master[0].ip
     ds_rootdn = 'cn=Directory Manager'
     ds_rootpw = 'Secret123'
     ldap_inst = LdapOperations(ldap_uri, ds_rootdn, ds_rootpw)
@@ -198,7 +198,7 @@ class TestProxyMisc(object):
         # Errors with empty loginShell and proxy provider bz785902
         tools = sssdTools(multihost.client[0])
         master_e = multihost.master[0].ip
-        ldap_uri = f'ldap://{master_e}'
+        ldap_uri = f'ldaps://{master_e}'
         ds_rootdn = 'cn=Directory Manager'
         ds_rootpw = 'Secret123'
         ldap_inst = LdapOperations(ldap_uri, ds_rootdn, ds_rootpw)
