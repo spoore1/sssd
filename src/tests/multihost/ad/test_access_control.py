@@ -267,6 +267,9 @@ class TestAccessControl(object):
         domain_name = tools.get_domain_section_name()
         dom_section = f'domain/{domain_name}'
         sssd_params = {'access_provider': 'simple',
+                       'ldap_search_timeout': '20',
+                       'ldap_network_timeout': '20',
+                       'ldap_opt_timeout': '20',
                        'simple_allow_groups': f'{l1_grp}@{domain_name}'}
         tools.sssd_conf(dom_section, sssd_params, action='add')
         tools.clear_sssd_cache()
@@ -304,6 +307,9 @@ class TestAccessControl(object):
         domain_name = tools.get_domain_section_name()
         dom_section = f'domain/{domain_name}'
         sssd_params = {'access_provider': 'simple',
+                       'ldap_search_timeout': '20',
+                       'ldap_network_timeout': '20',
+                       'ldap_opt_timeout': '20',
                        'simple_deny_groups': f'{l1_grp}@{domain_name}'}
         tools.sssd_conf(dom_section, sssd_params, action='add')
         tools.clear_sssd_cache()
