@@ -1,8 +1,10 @@
 flaky
 pytest
 git+https://github.com/next-actions/pytest-importance
-git+https://github.com/next-actions/pytest-mh
+#git+https://github.com/next-actions/pytest-mh
+git+https://github.com/spoore1/pytest-mh@journal_and_host_setup_fixes
 git+https://github.com/next-actions/pytest-ticket
 git+https://github.com/next-actions/pytest-tier
 git+https://github.com/next-actions/pytest-output
-git+https://github.com/SSSD/sssd-test-framework
+#git+https://github.com/SSSD/sssd-test-framework
+git+https://github.com/spoore1/sssd-test-framework@tests_ldap_auth_fixes
