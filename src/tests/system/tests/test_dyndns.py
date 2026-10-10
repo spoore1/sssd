@@ -232,6 +232,8 @@ def test_dyndns__update_with_address_filtering(
     client.sssd.domain["dyndns_iface"] = interfaces[0]
     client.sssd.start()
 
+    time.sleep(60)
+
     if interfaces[-1]:
         a_records = client.net.dig(hostname, provider.server)
         assert a_records, f"Host {hostname} was not found!"
